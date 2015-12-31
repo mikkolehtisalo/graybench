@@ -1,5 +1,14 @@
 # graybench
-Graylog2 HTTP/Gelf benchmark tool. Assumes TLS is enabled. 
+Graylog2 HTTP/Gelf benchmark tool. Assumes TLS is enabled. Should go effortlessly ludicrous speed.
+
+## Installation
+
+Prerequisite: Golang 1.4+
+
+```
+go get "github.com/mikkolehtisalo/graybench"
+go build "github.com/mikkolehtisalo/graybench"
+```
 
 ## Usage
 
