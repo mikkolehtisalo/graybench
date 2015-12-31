@@ -33,5 +33,5 @@ $ ./graybench
 2015-12-31T18:18:12+02:00: Total events: 1000000, Total time: 149s, EPS: 6673
 ```
 
-Event source is benchmarkhost, and the events attempt to mimick realistic data amounts (tune with command line settings).
+Event source is benchmarkhost, and the events [attempt to mimick](example.png) realistic data amounts (tune with command line settings).
 
