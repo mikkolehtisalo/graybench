@@ -11,6 +11,7 @@ import (
 	"math/rand"
 	"net/http"
 	"runtime"
+	"strings"
 	"sync"
 	"time"
 )
@@ -20,6 +21,8 @@ var (
 	shortLen int
 	fullLen int
 	customLen int
+	allowInsecure bool
+	useTLS bool
 )
 
 type LogItem struct {
@@ -70,7 +73,20 @@ func randomItem() LogItem {
 }
 	
 func buildClient() *http.Client {
-	tlsConfig := &tls.Config{RootCAs: x509.NewCertPool()}
+	if (useTLS) {
+		return buildTLSClient()
+	}
+	// Else build non-TLS client
+	return &http.Client{}
+}
+
+func buildTLSClient() *http.Client {
+	var tlsConfig *tls.Config
+	if (allowInsecure) {
+		tlsConfig = &tls.Config{RootCAs: x509.NewCertPool(), InsecureSkipVerify: true,}
+	} else {
+		tlsConfig = &tls.Config{RootCAs: x509.NewCertPool()}
+	}
 	transport := &http.Transport{TLSClientConfig: tlsConfig}
 	client := &http.Client{Transport: transport}
 	ok := tlsConfig.RootCAs.AppendCertsFromPEM(pemData)
@@ -89,7 +105,6 @@ func sendone(target string, client *http.Client) {
 	}
 
 	reader := bytes.NewReader(buf)
-	//client := buildClient()
 
 	resp, err := client.Post(target, "text/plain", reader)
 	if err != nil {
@@ -114,21 +129,26 @@ func main() {
 	shortLenPtr := flag.Int("shortlen", 20, "length of random short message")
 	fullLenPtr := flag.Int("fulllen", 200, "length of random full message")
 	customLenPtr := flag.Int("customlen", 20, "length of random custom message")
+	allowInsecurePtr := flag.Bool("allowinsecurecerts", false, "allow insecure certificates")
 	var ca string
 	flag.StringVar(&ca, "ca", "cert.pem", "file with ca certificate chain")
 	var target string
-	flag.StringVar(&target, "target", "https://graylog.local:12201/gelf", "target HTTP Gelf service")
+	flag.StringVar(&target, "target", "https://graylog.local:12201/gelf", "target HTTP/HTTPS Gelf input")
 	
 	flag.Parse()
-	// Lengths
+	// Initialize global variables
 	shortLen = *shortLenPtr
 	fullLen = *fullLenPtr
 	customLen = *customLenPtr
+	allowInsecure = *allowInsecurePtr
+	useTLS = strings.HasPrefix(target, "https")
 
-	var err error
-	pemData, err = ioutil.ReadFile(ca)
-	if err != nil {
-		panic(err)
+	if (useTLS) {
+		var err error
+		pemData, err = ioutil.ReadFile(ca)
+		if err != nil {
+			panic(err)
+		}
 	}
 
 	fmt.Printf("%s: Threads: %d, Events: %d, CA certificate chain: %s, Target: %s\n", time.Now().Format(time.RFC3339), *threads, *events, ca, target)

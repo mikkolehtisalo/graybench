@@ -14,6 +14,8 @@ go build "github.com/mikkolehtisalo/graybench"
 
 ```
 Usage of ./graybench:
+  -allowinsecurecerts
+    	allow insecure certificates
   -ca string
     	file with ca certificate chain (default "cert.pem")
   -customlen int
@@ -25,7 +27,7 @@ Usage of ./graybench:
   -shortlen int
     	length of random short message (default 20)
   -target string
-    	target HTTP Gelf service (default "https://graylog.local:12201/gelf")
+    	target HTTP/HTTPS Gelf input (default "https://graylog.local:12201/gelf")
   -threads int
     	amount of threads (default 10)
 ```
